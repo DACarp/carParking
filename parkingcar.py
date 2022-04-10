@@ -71,7 +71,6 @@ class Car:
             pygame.draw.circle(screen, (0, 255, 0), position, 5)
 
     def check_collision(self, game_map):
-        self.active = True
         for point in self.corners:
             # If Any Corner Touches Border Color -> Crash
             # Assumes Rectangle
@@ -80,8 +79,7 @@ class Car:
                 self.has_crashed = True
                 self.final_time = self.time
                 self.speed = 0  # Stop car and update flags
-
-                self.sprite = pygame.image.load('carRed.png').convert()  # Convert Speeds Up A Lot
+                self.sprite = pygame.image.load('carRed.png').convert()
                 self.sprite = pygame.transform.scale(self.sprite, (CAR_SIZE_X, CAR_SIZE_Y))
                 self.rotated_sprite = self.rotate_center(self.sprite, self.angle)
 
@@ -137,7 +135,9 @@ class Car:
         self.corners = [left_top, right_top, left_bottom, right_bottom]
 
         # Check Collisions And Clear Radars
-        self.check_collision(game_map)
+        if not self.has_crashed:
+            self.check_collision(game_map)
+
         self.radars.clear()
 
         # From -90 To 120 With Step-Size 45 Check Radar
@@ -175,11 +175,8 @@ class Car:
         else:  # No spot
             multiplier = 1
 
-        score = (score - distance) - self.final_time * 4
-        # Penalties for distance from target and time spent
-
         if self.has_crashed:  # Car was stopped by crash
-            score = (1500 - distance) + multiplier*12  # Give low score, but a slight push
+            return (1000 - distance) + multiplier*12  # Give low score, but a slight push
             #  toward parking spaces
         elif self.active:  # Car did not signal finish, but did not crash
             score = score * multiplier
@@ -189,6 +186,25 @@ class Car:
         #       are oriented the same way, so checking orientation based on spot color is easy.
         #       Can also check for being closer to the center of a parking spot by comparing
         #       length of the left and right sensors.
+
+        score = (score - distance) - self.final_time * 15
+        # Penalties for distance from target and time spent
+
+        # Debug
+        if self.has_crashed:
+            status = "Crashed"
+        elif self.active:
+            status = "Timed Out"
+        else:
+            status = "Parked"
+        print("Status: " + status)
+        print(self.has_crashed)
+        print("Time: " + str(self.final_time))
+        print("Distance: " + str(distance))
+        print("Fitness: " + str(score))
+        print("Spot Multiplier: " + str(multiplier))
+        print()
+        # Debug
 
         return score
 
@@ -284,15 +300,17 @@ def run_simulation(genomes, config):
 
         if still_active == 0:  # If all cars are stopped, get their reward and go to next iteration.
             for i, car in enumerate(cars):
-                if car.is_active():
-                    car.final_time = car.time
-
+                print(car.has_crashed)
                 genomes[i][1].fitness += car.get_reward(game_map)
             break
 
         counter += 1
         if counter == 30 * 20:  # Stop after about 10 seconds
             for i, car in enumerate(cars):
+                if car.is_active():
+                    car.final_time = car.time
+
+                print(car.has_crashed)
                 genomes[i][1].fitness += car.get_reward(game_map)
             break
 
