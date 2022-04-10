@@ -175,7 +175,7 @@ class Car:
         else:  # No spot
             multiplier = 1
 
-        score = (score - distance) - self.final_time * 2
+        score = (score - distance) - self.final_time * 4
         # Penalties for distance from target and time spent
 
         if self.has_crashed:  # Car was stopped by crash
