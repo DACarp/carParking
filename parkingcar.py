@@ -189,10 +189,10 @@ class Car:
         # Penalties for distance from target and time spent
 
         if self.has_crashed:  # Car was stopped by crash, overwrite score
-            score = (800 - distance) + multiplier*12  # Give low score, but a slight push
-            #  toward parking spaces
+            score = (1000 - distance*2) - self.final_time + multiplier*12  # Give low score, but a slight push
+            #  toward parking spaces and distance
 
-        # Debug
+        # Debug/logging
         if self.has_crashed:
             status = "Crashed"
         elif self.active:
