@@ -157,6 +157,7 @@ class Car:
         return self.active
 
     def get_reward(self, game_map):
+
         score = 3000  # Base score
 
         car_x = int(self.center[0])
@@ -175,10 +176,7 @@ class Car:
         else:  # No spot
             multiplier = 1
 
-        if self.has_crashed:  # Car was stopped by crash
-            return (1000 - distance) + multiplier*12  # Give low score, but a slight push
-            #  toward parking spaces
-        elif self.active:  # Car did not signal finish, but did not crash
+        if self.active:  # Car did not signal finish, but did not crash
             score = score * multiplier
         else:  # Car signaled finish
             score = score * (multiplier + 1)
@@ -187,8 +185,12 @@ class Car:
         #       Can also check for being closer to the center of a parking spot by comparing
         #       length of the left and right sensors.
 
-        score = (score - distance) - self.final_time * 15
+        score = (score - distance) - self.final_time
         # Penalties for distance from target and time spent
+
+        if self.has_crashed:  # Car was stopped by crash, overwrite score
+            score = (800 - distance) + multiplier*12  # Give low score, but a slight push
+            #  toward parking spaces
 
         # Debug
         if self.has_crashed:
@@ -198,7 +200,6 @@ class Car:
         else:
             status = "Parked"
         print("Status: " + status)
-        print(self.has_crashed)
         print("Time: " + str(self.final_time))
         print("Distance: " + str(distance))
         print("Fitness: " + str(score))
@@ -300,7 +301,6 @@ def run_simulation(genomes, config):
 
         if still_active == 0:  # If all cars are stopped, get their reward and go to next iteration.
             for i, car in enumerate(cars):
-                print(car.has_crashed)
                 genomes[i][1].fitness += car.get_reward(game_map)
             break
 
@@ -310,7 +310,6 @@ def run_simulation(genomes, config):
                 if car.is_active():
                     car.final_time = car.time
 
-                print(car.has_crashed)
                 genomes[i][1].fitness += car.get_reward(game_map)
             break
 
