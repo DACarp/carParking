@@ -12,8 +12,6 @@ import neat
 import pygame
 
 # Constants
-# WIDTH = 1600
-# HEIGHT = 880
 
 WIDTH = 1920
 HEIGHT = 1080
@@ -24,7 +22,7 @@ CAR_SIZE_Y = 60
 BORDER_COLOR = (255, 255, 255, 255)  # Color To Crash on Hit (White)
 BEST_SPOTS_COLOR = (0, 200, 0, 255)  # Color for best parking spots (Green)
 MED_SPOTS_COLOR = (255, 200, 0, 255) # Color for middle parking spots (Yellow)
-BAD_SPOTS_COLOR = ()  # Color for worst parking spots (red)
+BAD_SPOTS_COLOR = (200, 0, 0, 255)  # Color for worst parking spots (red)
 
 DOOR_LOCATION = [1060, 160]  # Target for the agents, for tuning of parking spaces chosen.
 
@@ -158,7 +156,7 @@ class Car:
 
     def get_reward(self, game_map):
 
-        score = 3000  # Base score
+        score = 2000  # Base score
 
         car_x = int(self.center[0])
         car_y = int(self.center[1])
@@ -177,7 +175,7 @@ class Car:
             multiplier = 1
 
         if self.active:  # Car did not signal finish, but did not crash
-            score = score * multiplier
+            score = score * multiplier - 500
         else:  # Car signaled finish
             score = score * (multiplier + 1)
         # TODO: implement scoring based on alignment with parking spot. All spots of one color
@@ -193,18 +191,18 @@ class Car:
             #  toward parking spaces and distance
 
         # Debug/logging
-        if self.has_crashed:
-            status = "Crashed"
-        elif self.active:
-            status = "Timed Out"
-        else:
-            status = "Parked"
-        print("Status: " + status)
-        print("Time: " + str(self.final_time))
-        print("Distance: " + str(distance))
-        print("Fitness: " + str(score))
-        print("Spot Multiplier: " + str(multiplier))
-        print()
+        # if self.has_crashed:
+        #     status = "Crashed"
+        # elif self.active:
+        #     status = "Timed Out"
+        # else:
+        #     status = "Parked"
+        # print("Status: " + status)
+        # print("Time: " + str(self.final_time))
+        # print("Distance: " + str(distance))
+        # print("Fitness: " + str(score))
+        # print("Spot Multiplier: " + str(multiplier))
+        # print()
         # Debug
 
         return score
@@ -305,7 +303,7 @@ def run_simulation(genomes, config):
             break
 
         counter += 1
-        if counter == 30 * 20:  # Stop after about 10 seconds
+        if counter == 30 * 10:  # Stop after about 5 seconds
             for i, car in enumerate(cars):
                 if car.is_active():
                     car.final_time = car.time
@@ -317,7 +315,7 @@ def run_simulation(genomes, config):
         screen.blit(game_map, (0, 0))
         for car in cars:
             car.draw(screen)
-        
+
         # Display Info
         text = generation_font.render("Generation: " + str(current_generation), True, (0,0,0))
         text_rect = text.get_rect()
