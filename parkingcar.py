@@ -241,12 +241,15 @@ def run_simulation(genomes, config):
     generation_font = pygame.font.SysFont("Arial", 30)
     active_font = pygame.font.SysFont("Arial", 20)
 
-    game_map = pygame.image.load('Map01.png').convert()  # Convert Speeds Up A Lot
-    # TODO: Randomize map, either by choosing a random one or randomly blocking
-    #       parking spots. Will demonstrate algorithm robustness.
-
     global current_generation
     current_generation += 1
+
+    map_id = str(random.randint(1, 4))
+
+    if current_generation <= 500:
+        map_id = '1'
+
+    game_map = pygame.image.load('Map0'+map_id+'.png').convert()  # Convert Speeds Up A Lot
 
     # Simple Counter To Roughly Limit Time (Not Good Practice)
     counter = 0
@@ -346,6 +349,8 @@ if __name__ == "__main__":
     population.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
-    
+
+    print('TRAINED RANDOM TEST--500')
+
     # Run Simulation For A Maximum of 100,000 Generations
     population.run(run_simulation, 100000)
